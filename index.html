@@ -76,7 +76,7 @@
     }
 
     .katex-display {
-      margin: 0.5em 0;
+      margin: 0;
       overflow-x: auto;
       overflow-y: hidden;
     }
@@ -401,18 +401,18 @@
       }, []);
 
       return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-8">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-4xl font-bold text-foreground text-center mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-2 sm:mb-4">
               拉格朗日插值多项式114514梗图生成器
             </h1>
 
-            <div className="text-2xl text-foreground text-center mb-8">
+            <div className="text-lg sm:text-2xl text-foreground text-center mb-6 sm:mb-8">
               输入找规律题，就能生成一条香气四溢的拉格朗日插值多项式来求解它~
             </div>
 
-            <div className="bg-card rounded-lg shadow-lg p-6 mb-8 border border-border">
-              <label className="block text-foreground font-semibold text-lg mb-2 flex items-center gap-2">
+            <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 border border-border">
+              <label className="block text-foreground font-semibold text-base sm:text-lg mb-2 flex items-center gap-2">
                 输入数组：
                 <TooltipIcon title="用空格或逗号分隔， ? 表示待填空的数。逗号和问号字符支持中文和英文" />
               </label>
@@ -425,20 +425,20 @@
                     handleGenerate();
                   }
                 }}
-                className="w-full px-4 py-2 border-2 border-input rounded-lg focus:outline-none focus:border-primary text-foreground bg-background font-mono"
+                className="w-full px-3 sm:px-4 py-2 border-2 border-input rounded-lg focus:outline-none focus:border-primary text-foreground bg-background font-mono text-sm sm:text-base"
                 placeholder="例如：1,3,5,?,9,?,13"
               />
-              <div className="mt-4 flex gap-4">
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={handleGenerate}
-                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold"
+                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold w-full sm:w-auto"
                 >
                   生成多项式
                 </button>
                 {polynomial && (
                   <button
                     onClick={handleSaveImage}
-                    className="px-6 py-2 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold flex items-center gap-2"
+                    className="px-6 py-2 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     保存梗图
                     <TooltipIcon title="html2canvas 保存出来的图片错位严重，建议按 F12 打开控制台，用 capture node screenshot 命令来截图" />
@@ -450,20 +450,26 @@
             {polynomial && (
               <div
                 ref={resultRef}
-                className="relative bg-card rounded-lg shadow-lg p-8 border-4 border-border overflow-hidden"
+                className="relative bg-card rounded-lg shadow-lg p-4 sm:p-8 border-4 border-border overflow-hidden"
               >
-                <span className="absolute bottom-[28%] right-[28%] text-secondary-foreground text-3xl font-bold rotate-12">
+                {/* 不知道为什么 bottom-42 right-76 lg:bottom-90 lg:right-40 不生效 */}
+                <span className="absolute bottom-[120px] right-[220px] sm:bottom-[168px] sm:right-[284px] lg:bottom-[360px] lg:right-[160px] text-secondary-foreground text-2xl sm:text-3xl font-bold rotate-12">
                   真有逻辑
                 </span>
 
-                <img src="野兽先辈.png" alt="野兽先辈" className="absolute bottom-8 right-8" />
+                <img
+                  src="野兽先辈.png"
+                  alt="野兽先辈"
+                  crossOrigin="anonymous"
+                  className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-56 h-56 sm:w-72 sm:h-72 lg:w-auto lg:h-auto object-contain pointer-events-none select-none"
+                />
 
-                <h2 className="text-3xl font-bold text-foreground text-center mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-3 sm:mb-4">
                   试着找出问号所代表的数
                 </h2>
 
-                <div className="text-center mb-4">
-                  <div className="text-5xl font-bold text-foreground font-mono">
+                <div className="text-center mb-3 sm:mb-4 overflow-x-auto">
+                  <div className="text-3xl sm:text-5xl font-bold text-foreground font-mono whitespace-nowrap">
                     {points.map((p, i) => (
                       <span key={i}>
                         {p.original}
@@ -473,9 +479,9 @@
                   </div>
                 </div>
 
-                <div className="text-center mb-4">
-                  <h3 className="text-3xl font-semibold text-foreground mb-4 font-serif">正确答案是</h3>
-                  <div className="text-5xl font-bold text-primary font-mono">
+                <div className="text-center mb-3 sm:mb-4">
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3 sm:mb-4 font-serif">正确答案是</h3>
+                  <div className="text-3xl sm:text-5xl font-bold text-primary font-mono">
                     {points.filter(p => p.original === '?').map((p, i) => (
                       <span key={i}>
                         {p.y.fraction.n.toString()}
@@ -485,29 +491,29 @@
                   </div>
                 </div>
 
-                <div className="text-center mb-4">
-                  <p className="text-3xl font-semibold text-foreground mb-4 font-serif">因为当</p>
+                <div className="text-center mb-3 sm:mb-4">
+                  <p className="text-2xl sm:text-3xl font-semibold text-foreground mb-3 sm:mb-4 font-serif">因为当</p>
                 </div>
 
-                <div className="bg-background rounded-lg p-4 mb-4 shadow-inner border-2 border-border">
+                <div className="bg-background rounded-lg px-3 sm:px-4 py-4 sm:py-6 mb-3 sm:mb-4 shadow-inner border-2 border-border overflow-x-auto">
                   <LatexDisplay latex={`f(x) = ${polynomial.toLatex()}`} displayMode={true} />
                 </div>
 
-                <div className="space-y-2 mb-4">
+                <div className="space-y-1 sm:space-y-2 mb-3 sm:mb-4">
                   {points.map((p, i) => (
-                    <div key={i} className="flex items-center justify-center text-xl text-foreground font-mono">
-                      <span className={p.original === '?' ? 'border-2 border-primary rounded-lg px-9 py-3 bg-secondary/30' : ''}>
+                    <div key={i} className="flex items-center justify-center text-base sm:text-xl text-foreground font-mono">
+                      <span className={p.original === '?' ? 'border-2 border-primary rounded-lg px-6 sm:px-9 py-2 sm:py-3 bg-secondary/30' : ''}>
                         f({p.x.fraction.n.toString()}) = {p.y.fraction.n.toString()}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="text-center">
-                  <p className="text-2xl text-muted-foreground italic">
+                <div className="text-center mb-56 lg:mb-0">
+                  <p className="text-xl sm:text-2xl text-muted-foreground italic">
                     哇 数学
                   </p>
-                  <p className="text-2xl text-muted-foreground italic">
+                  <p className="text-xl sm:text-2xl text-muted-foreground italic">
                     真是有趣
                   </p>
                 </div>
