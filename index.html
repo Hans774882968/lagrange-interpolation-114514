@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>拉格朗日插值多项式114514梗图生成器</title>
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&family=Space+Mono&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React and ReactDOM -->
+  <script
+    crossorigin
+    src="https://unpkg.com/react@18/umd/react.production.min.js"
+  ></script>
+  <script
+    crossorigin
+    src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+  ></script>
+
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Fraction.js -->
+  <script src="https://cdn.jsdelivr.net/npm/fraction.js@4.3.7/fraction.min.js"></script>
+
+  <!-- KaTeX -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+  >
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --background: #fff0f8;
+      --foreground: #91185c;
+      --card: #fff7fc;
+      --card-foreground: #91185c;
+      --popover: #fff7fc;
+      --popover-foreground: #91185c;
+      --primary: #e6067a;
+      --primary-foreground: #ffffff;
+      --secondary: #ffd6ff;
+      --secondary-foreground: #91185c;
+      --muted: #ffe3f2;
+      --muted-foreground: #c04283;
+      --accent: #ffc1e3;
+      --accent-foreground: #91185c;
+      --destructive: #d13869;
+      --destructive-foreground: #ffffff;
+      --border: #ffc7e6;
+      --input: #ffd6ff;
+      --ring: #e6067a;
+      --font-sans: 'Poppins', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+      --font-mono: 'Space Mono', monospace;
+      --radius: 0.5rem;
+    }
+
+    body {
+      font-family: var(--font-sans);
+    }
+
+    .katex-display {
+      margin: 0.5em 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: 'var(--background)',
+            foreground: 'var(--foreground)',
+            card: 'var(--card)',
+            'card-foreground': 'var(--card-foreground)',
+            popover: 'var(--popover)',
+            'popover-foreground': 'var(--popover-foreground)',
+            primary: 'var(--primary)',
+            'primary-foreground': 'var(--primary-foreground)',
+            secondary: 'var(--secondary)',
+            'secondary-foreground': 'var(--secondary-foreground)',
+            muted: 'var(--muted)',
+            'muted-foreground': 'var(--muted-foreground)',
+            accent: 'var(--accent)',
+            'accent-foreground': 'var(--accent-foreground)',
+            destructive: 'var(--destructive)',
+            'destructive-foreground': 'var(--destructive-foreground)',
+            border: 'var(--border)',
+            input: 'var(--input)',
+            ring: 'var(--ring)',
+          },
+          fontFamily: {
+            sans: ['var(--font-sans)', 'sans-serif'],
+            mono: ['var(--font-mono)', 'monospace'],
+            serif: ['var(--font-serif)', 'serif'],
+          },
+          borderRadius: {
+            sm: 'calc(var(--radius) - 4px)',
+            md: 'calc(var(--radius) - 2px)',
+            lg: 'var(--radius)',
+            xl: 'calc(var(--radius) + 4px)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-background text-foreground min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+    const MEME_NUMBERS = [114514, 1919810];
+
+    class Frac {
+      constructor(num, den = 1) {
+        if (typeof num === 'number') {
+          this.fraction = new Fraction(num, den);
+        } else if (typeof num === 'string') {
+          this.fraction = new Fraction(num);
+        } else if (num instanceof Fraction) {
+          this.fraction = num;
+        } else {
+          this.fraction = new Fraction(0);
+        }
+      }
+
+      static fromFraction(f) {
+        const result = Object.create(Frac.prototype);
+        result.fraction = f;
+        return result;
+      }
+
+      add(other) {
+        return Frac.fromFraction(this.fraction.add(other.fraction));
+      }
+
+      sub(other) {
+        return Frac.fromFraction(this.fraction.sub(other.fraction));
+      }
+
+      mul(other) {
+        return Frac.fromFraction(this.fraction.mul(other.fraction));
+      }
+
+      div(other) {
+        return Frac.fromFraction(this.fraction.div(other.fraction));
+      }
+
+      neg() {
+        return Frac.fromFraction(this.fraction.neg());
+      }
+
+      toLatex() {
+        const n = this.fraction.n;
+        const d = this.fraction.d;
+
+        if (d === 1) {
+          return n.toString();
+        } else {
+          return `\\frac{${n}}{${d}}`;
+        }
+      }
+
+      toString() {
+        const n = this.fraction.n;
+        const d = this.fraction.d;
+
+        if (d === 1) {
+          return n.toString();
+        } else {
+          return `${n}/${d}`;
+        }
+      }
+    }
+
+    class Polynomial {
+      constructor(coefficients = []) {
+        this.coeffs = coefficients.map(c => c instanceof Frac ? c : new Frac(c));
+        this.simplify();
+      }
+
+      simplify() {
+        while (this.coeffs.length > 1 && this.coeffs[this.coeffs.length - 1].fraction.compare(0) === 0) {
+          this.coeffs.pop();
+        }
+        if (this.coeffs.length === 0) {
+          this.coeffs = [new Frac(0)];
+        }
+      }
+
+      add(other) {
+        const maxLen = Math.max(this.coeffs.length, other.coeffs.length);
+        const result = [];
+        for (let i = 0; i < maxLen; i++) {
+          const a = this.coeffs[i] || new Frac(0);
+          const b = other.coeffs[i] || new Frac(0);
+          result.push(a.add(b));
+        }
+        return new Polynomial(result);
+      }
+
+      mul(other) {
+        if (other.coeffs.length === 1) {
+          return new Polynomial(this.coeffs.map(c => c.mul(other.coeffs[0])));
+        }
+
+        const result = new Array(this.coeffs.length + other.coeffs.length - 1).fill(null).map(() => new Frac(0));
+        for (let i = 0; i < this.coeffs.length; i++) {
+          for (let j = 0; j < other.coeffs.length; j++) {
+            result[i + j] = result[i + j].add(this.coeffs[i].mul(other.coeffs[j]));
+          }
+        }
+        return new Polynomial(result);
+      }
+
+      toLatex() {
+        if (this.coeffs.every(c => c.fraction.compare(0) === 0)) {
+          return '0';
+        }
+
+        let latex = '';
+        let first = true;
+
+        for (let i = this.coeffs.length - 1; i >= 0; i--) {
+          const coeff = this.coeffs[i];
+          if (coeff.fraction.compare(0) === 0) continue;
+
+          const isNegative = coeff.fraction.compare(0) < 0;
+          const absCoeff = coeff.fraction.compare(0) < 0 ? coeff.neg() : coeff;
+
+          if (!first) {
+            latex += isNegative ? ' - ' : ' + ';
+          } else if (isNegative) {
+            latex += '-';
+          }
+
+          const isOne = absCoeff.fraction.compare(1) === 0;
+
+          if (i === 0) {
+            latex += absCoeff.toLatex();
+          } else if (i === 1) {
+            if (!isOne) {
+              latex += absCoeff.toLatex();
+            }
+            latex += 'x';
+          } else {
+            if (!isOne) {
+              latex += absCoeff.toLatex();
+            }
+            latex += `x^{${i}}`;
+          }
+
+          first = false;
+        }
+
+        return latex || '0';
+      }
+    }
+
+    function lagrangeInterpolation(points) {
+      const n = points.length;
+      let result = new Polynomial();
+
+      for (let i = 0; i < n; i++) {
+        let basis = new Polynomial([new Frac(1)]);
+        let numerator = new Frac(1);
+
+        for (let j = 0; j < n; j++) {
+          if (i !== j) {
+            const xj = new Polynomial([points[j].x.neg(), new Frac(1)]);
+            basis = basis.mul(xj);
+            numerator = numerator.mul(points[i].x.sub(points[j].x));
+          }
+        }
+
+        const coeff = points[i].y.div(numerator);
+        const term = basis.mul(new Polynomial([coeff]));
+        result = result.add(term);
+      }
+
+      return result;
+    }
+
+    function parseInput(input) {
+      const tokens = input.replace(/[,，]/g, ' ').replaceAll('？', '?')
+        .trim().split(/\s+/).filter(t => t.length > 0);
+
+      const points = [];
+      let questionMarkIndex = 0;
+
+      tokens.forEach((token, index) => {
+        const x = new Frac(index + 1);
+        let y;
+
+        if (token === '?') {
+          const memeNum = MEME_NUMBERS[questionMarkIndex % 2];
+          y = new Frac(memeNum);
+          questionMarkIndex++;
+        } else {
+          y = new Frac(token);
+        }
+
+        points.push({ x, y, original: token });
+      });
+
+      return points;
+    }
+
+    function LatexDisplay({ latex, displayMode = false }) {
+      const ref = useRef(null);
+
+      useEffect(() => {
+        if (ref.current) {
+          try {
+            katex.render(latex, ref.current, {
+              displayMode: displayMode,
+              throwOnError: false,
+              strict: false
+            });
+          } catch (e) {
+            console.error('KaTeX render error:', e);
+          }
+        }
+      }, [latex, displayMode]);
+
+      return <div ref={ref} className={displayMode ? 'katex-display' : ''}></div>;
+    }
+
+    function TooltipIcon({ title }) {
+      return (
+        <span
+          className="inline-flex items-center justify-center w-5 h-5 rounded-full border-2 border-current text-xs font-bold cursor-help transition-opacity hover:opacity-70"
+          title={title}
+        >
+          ?
+        </span>
+      );
+    }
+
+    function App() {
+      const [input, setInput] = useState('1,3,5,?,9,?,13');
+      const [points, setPoints] = useState([]);
+      const [polynomial, setPolynomial] = useState(null);
+      const resultRef = useRef(null);
+
+      const handleGenerate = () => {
+        try {
+          const parsedPoints = parseInput(input);
+          setPoints(parsedPoints);
+          const poly = lagrangeInterpolation(parsedPoints);
+          setPolynomial(poly);
+        } catch (e) {
+          console.error('生成拉格朗日插值多项式的过程中发生错误：', e);
+          alert(`生成拉格朗日插值多项式的过程中发生错误：${e}`);
+        }
+      };
+
+      const handleSaveImage = async () => {
+        if (!resultRef.current) return;
+
+        try {
+          const canvas = await html2canvas(resultRef.current, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#fff0f8',
+            logging: false
+          });
+
+          const link = document.createElement('a');
+          link.download = 'lagrange-polynomial.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } catch (e) {
+          console.error('Error saving image:', e);
+          alert('保存图片失败');
+        }
+      };
+
+      useEffect(() => {
+        handleGenerate();
+      }, []);
+
+      return (
+        <div className="min-h-screen bg-background p-8">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-4xl font-bold text-foreground text-center mb-4">
+              拉格朗日插值多项式114514梗图生成器
+            </h1>
+
+            <div className="text-2xl text-foreground text-center mb-8">
+              输入找规律题，就能生成一条香气四溢的拉格朗日插值多项式来求解它~
+            </div>
+
+            <div className="bg-card rounded-lg shadow-lg p-6 mb-8 border border-border">
+              <label className="block text-foreground font-semibold text-lg mb-2 flex items-center gap-2">
+                输入数组：
+                <TooltipIcon title="用空格或逗号分隔， ? 表示待填空的数。逗号和问号字符支持中文和英文" />
+              </label>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleGenerate();
+                  }
+                }}
+                className="w-full px-4 py-2 border-2 border-input rounded-lg focus:outline-none focus:border-primary text-foreground bg-background font-mono"
+                placeholder="例如：1,3,5,?,9,?,13"
+              />
+              <div className="mt-4 flex gap-4">
+                <button
+                  onClick={handleGenerate}
+                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold"
+                >
+                  生成多项式
+                </button>
+                {polynomial && (
+                  <button
+                    onClick={handleSaveImage}
+                    className="px-6 py-2 bg-accent text-accent-foreground rounded-lg hover:opacity-90 transition-opacity font-semibold flex items-center gap-2"
+                  >
+                    保存梗图
+                    <TooltipIcon title="html2canvas 保存出来的图片错位严重，建议按 F12 打开控制台，用 capture node screenshot 命令来截图" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {polynomial && (
+              <div
+                ref={resultRef}
+                className="relative bg-card rounded-lg shadow-lg p-8 border-4 border-border overflow-hidden"
+              >
+                <span className="absolute bottom-[28%] right-[28%] text-secondary-foreground text-3xl font-bold rotate-12">
+                  真有逻辑
+                </span>
+
+                <img src="野兽先辈.png" alt="野兽先辈" className="absolute bottom-8 right-8" />
+
+                <h2 className="text-3xl font-bold text-foreground text-center mb-4">
+                  试着找出问号所代表的数
+                </h2>
+
+                <div className="text-center mb-4">
+                  <div className="text-5xl font-bold text-foreground font-mono">
+                    {points.map((p, i) => (
+                      <span key={i}>
+                        {p.original}
+                        {i < points.length - 1 && <span className="text-muted-foreground">,</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="text-center mb-4">
+                  <h3 className="text-3xl font-semibold text-foreground mb-4 font-serif">正确答案是</h3>
+                  <div className="text-5xl font-bold text-primary font-mono">
+                    {points.filter(p => p.original === '?').map((p, i) => (
+                      <span key={i}>
+                        {p.y.fraction.n.toString()}
+                        {i < points.filter(p => p.original === '?').length - 1 && <span className="text-muted-foreground">,</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="text-center mb-4">
+                  <p className="text-3xl font-semibold text-foreground mb-4 font-serif">因为当</p>
+                </div>
+
+                <div className="bg-background rounded-lg p-4 mb-4 shadow-inner border-2 border-border">
+                  <LatexDisplay latex={`f(x) = ${polynomial.toLatex()}`} displayMode={true} />
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  {points.map((p, i) => (
+                    <div key={i} className="flex items-center justify-center text-xl text-foreground font-mono">
+                      <span className={p.original === '?' ? 'border-2 border-primary rounded-lg px-9 py-3 bg-secondary/30' : ''}>
+                        f({p.x.fraction.n.toString()}) = {p.y.fraction.n.toString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <p className="text-2xl text-muted-foreground italic">
+                    哇 数学
+                  </p>
+                  <p className="text-2xl text-muted-foreground italic">
+                    真是有趣
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
